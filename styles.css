@@ -2090,7 +2090,13 @@ body {
 .auth-switch-link:hover {
     text-decoration: underline;
 }
-
+.auth-hint{
+    margin: 0;
+    margin-bottom: 15px; 
+    font-size: 14px; 
+    color: #666; 
+    text-align: left;
+}
 /* Profile Modal */
 .profile-modal {
     max-width: 400px;

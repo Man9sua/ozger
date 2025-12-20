@@ -120,6 +120,9 @@ const i18n = {
         haveAccount: 'Аккаунтыңыз бар ма?',
         signUp: 'Тіркелу',
         signIn: 'Кіру',
+        forgotPassword: 'Құпия сөзді ұмыттыңыз ба?',
+        resetPassword: 'Электрондық поштаңызға кіру рұқсатын қалпына келтіру үшін сілтеме жібереміз.',
+        sendResetLink: 'Сілтеме жіберу',
         loginSuccess: 'Сәтті кірдіңіз!',
         registerSuccess: 'Тіркелу сәтті! Email-ды тексеріңіз.',
         loginError: 'Кіру қатесі',
@@ -313,6 +316,9 @@ const i18n = {
         haveAccount: 'Есть аккаунт?',
         signUp: 'Зарегистрироваться',
         signIn: 'Войти',
+        forgotPassword: 'Забыли пароль?',
+        resetPassword: 'Мы отправим ссылку для восстановления доступа на ваш email',
+        sendResetLink: 'Отправить ссылку',
         loginSuccess: 'Успешный вход!',
         registerSuccess: 'Регистрация успешна! Проверьте email.',
         loginError: 'Ошибка входа',
@@ -505,6 +511,9 @@ const i18n = {
         haveAccount: 'Already have an account?',
         signUp: 'Sign Up',
         signIn: 'Sign In',
+        forgotPassword: 'Forgot password?',
+        resetPassword: 'We will send restore access link to your email',
+        sendResetLink: 'Send link',
         loginSuccess: 'Login successful!',
         registerSuccess: 'Registration successful! Check your email.',
         loginError: 'Login error',
@@ -1470,11 +1479,55 @@ function updateAuthSteps() {
 }
 
 function renderAuthForm(mode = 'login') {
-    const isLogin = mode === 'login';
+    const isForgot = mode === 'forgot';
+    const isLogin = mode === 'login' && !isForgot;
     const container = document.getElementById('authFormContainer');
     const title = document.getElementById('authModalTitle');
     
-    if (title) title.textContent = isLogin ? t('login') : t('register');
+    if (title) {
+        if (isForgot) {
+            title.textContent = t('forgotPassword');
+        } else {
+            title.textContent = isLogin ? t('login') : t('register');
+        }
+    }
+    
+    // For forgot password, show email-only form
+    if (isForgot) {
+        regStep = 0;
+        updateAuthSteps();
+        
+        if (container) {
+            container.innerHTML = `
+                <form class="auth-form" id="authForm">
+                    <div class="form-group">
+                        <label class="form-label">${t('emailPlaceholder')}</label>
+                        <input type="email" class="form-input" id="resetEmail" placeholder="${t('emailPlaceholder')}" required>
+                    </div>
+                    <p class="auth-hint">
+                        ${t('resetPassword')}
+                    </p>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+                        ${t('sendResetLink')}
+                    </button>
+                </form>
+                <div class="auth-switch">
+                    ${t('haveAccount')}
+                    <span class="auth-switch-link" id="backToLog">${t('signUp')}</span>
+                </div>
+            `;
+            
+            document.getElementById('authForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleForgotPassword();
+            });
+            
+            document.getElementById('backToLog')?.addEventListener('click', () => {
+                renderAuthForm('login');
+            });
+        }
+        return;
+    }
     
     // For login, show simple form
     if (isLogin) {
@@ -1490,6 +1543,7 @@ function renderAuthForm(mode = 'login') {
                     <div class="form-group">
                         <input type="password" class="form-input" id="authPassword" placeholder="${t('passwordPlaceholder')}" required>
                     </div>
+                     <span class="auth-switch-link" id="forgotPassword">${t('forgotPassword')}</span>
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
                         ${t('signIn')}
                     </button>
@@ -1503,6 +1557,10 @@ function renderAuthForm(mode = 'login') {
             document.getElementById('authForm')?.addEventListener('submit', (e) => {
                 e.preventDefault();
                 handleAuth(true);
+            });
+            
+            document.getElementById('forgotPassword')?.addEventListener('click', () => {
+                renderAuthForm('forgot');
             });
             
             document.getElementById('authSwitchLink')?.addEventListener('click', () => {
@@ -1820,6 +1878,56 @@ async function handleLogout() {
     } catch (err) {
         showToast('Logout error: ' + err.message, 'error');
     }
+}
+async function handleForgotPassword() {
+    const emailInput = document.getElementById('resetEmail');
+    if (!emailInput || !supabaseClient) return;
+
+    const email = emailInput.value.trim();
+    if (!email) {
+        showToast(t('emailPlaceholder') + ' required', 'warning');
+        return;
+    }
+
+    pendingResetEmail = email;
+    // Use query parameters for Netlify compatibility
+    const resetUrl = `${window.location.origin}?type=recovery`;
+
+    console.log('Attempting to send reset link to:', email);
+    console.log('Reset URL:', resetUrl);
+
+    try {
+        // Use Supabase built-in reset password function
+        const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: resetUrl
+        });
+
+        if (error) {
+            console.error('Reset password error:', error);
+            console.log('❌ Email not configured in Supabase!');
+            console.log('📧 To enable email sending, follow instructions in SUPABASE_EMAIL_SETUP.md');
+            console.log('🔗 For testing, use this reset URL:', resetUrl);
+
+            // Show helpful message to user
+            showToast('Email not configured. Check console for reset URL.', 'warning');
+
+            // Still show success modal for testing
+            setAuthStep('forgot-password-modal');
+        } else {
+            console.log('Reset password link sent successfully:', data);
+            showToast('Reset password link sent to your email', 'success');
+            setAuthStep('forgot-password-modal');
+        }
+    } catch (err) {
+        console.error('Reset password error:', err);
+        console.log('❌ Network/Supabase error!');
+        console.log('📧 Check SUPABASE_EMAIL_SETUP.md for configuration');
+        console.log('🔗 For testing, use this reset URL:', resetUrl);
+
+        showToast('Check console for reset URL (email not configured)', 'warning');
+        setAuthStep('forgot-password-modal');
+    }
+
 }
 
 async function loadSession() {
