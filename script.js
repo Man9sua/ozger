@@ -1916,6 +1916,7 @@ async function handleForgotPassword() {
     if (!emailInput || !supabaseClient) return;
 
     const email = emailInput.value.trim();
+    const resetUrl = `${window.location.origin}?type=recovery`;
     try {
         // Use Supabase built-in reset password function
         const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
@@ -1926,7 +1927,7 @@ async function handleForgotPassword() {
             console.error('Reset password error:', error);
             console.log('❌ Email not configured in Supabase!');
             console.log('📧 To enable email sending, follow instructions in SUPABASE_EMAIL_SETUP.md');
-            console.log('🔗 For testing, use this reset URL:', resetUrl);
+
 
 
         } else {
@@ -1938,7 +1939,7 @@ async function handleForgotPassword() {
         console.error('Reset password error:', err);
         console.log('❌ Network/Supabase error!');
         console.log('📧 Check SUPABASE_EMAIL_SETUP.md for configuration');
-        console.log('🔗 For testing, use this reset URL:', resetUrl);
+
 
 
     }
