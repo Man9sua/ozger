@@ -1908,15 +1908,11 @@ async function handleForgotPassword() {
             console.log('📧 To enable email sending, follow instructions in SUPABASE_EMAIL_SETUP.md');
             console.log('🔗 For testing, use this reset URL:', resetUrl);
 
-            // Show helpful message to user
-            showToast('Email not configured. Check console for reset URL.', 'warning');
 
-            // Still show success modal for testing
-            setAuthStep('forgot-password-modal');
         } else {
             console.log('Reset password link sent successfully:', data);
             showToast('Reset password link sent to your email', 'success');
-            setAuthStep('forgot-password-modal');
+;
         }
     } catch (err) {
         console.error('Reset password error:', err);
@@ -1925,10 +1921,40 @@ async function handleForgotPassword() {
         console.log('🔗 For testing, use this reset URL:', resetUrl);
 
         showToast('Check console for reset URL (email not configured)', 'warning');
-        setAuthStep('forgot-password-modal');
+
     }
 
 }
+    if (accessToken && refreshToken && type === 'recovery') {
+        // This is a password reset link
+        console.log('Password reset link detected');
+        console.log('Current URL:', window.location.href);
+        console.log('Hash params:', window.location.hash);
+        console.log('Query params:', window.location.search);
+        console.log('Access token:', accessToken.substring(0, 20) + '...');
+        console.log('Type:', type);
+
+        try {
+            // Set the session from URL parameters
+            const { data, error } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+            });
+
+            if (error) {
+                console.error('Session error:', error);
+                showToast('Invalid or expired reset link', 'error');
+            } else {
+                console.log('Session set successfully for password reset');
+                // Clear the URL parameters to clean up the URL
+                window.history.replaceState(null, null, window.location.pathname);
+                // Open the reset password modal
+
+            }
+        } catch (err) {
+            console.error('Error setting session:', err);
+            showToast('Error processing reset link', 'error');
+        }}
 
 async function loadSession() {
     if (!supabaseClient) return;
