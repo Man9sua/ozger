@@ -1481,6 +1481,7 @@ function updateAuthSteps() {
 function renderAuthForm(mode = 'login') {
     const isForgot = mode === 'forgot';
     const isLogin = mode === 'login' && !isForgot;
+    const isReset = mode === 'reset';
     const container = document.getElementById('authFormContainer');
     const title = document.getElementById('authModalTitle');
     
@@ -1491,7 +1492,38 @@ function renderAuthForm(mode = 'login') {
             title.textContent = isLogin ? t('login') : t('register');
         }
     }
-    
+    // RESET PASSWORD (new password + confirm)
+    if (isReset) {
+        regStep = 0;
+        updateAuthSteps();
+
+        if (container) {
+            title.textContent = t('resetPassword');
+
+            container.innerHTML = `
+                <form class="auth-form" id="authForm">
+                    <div class="form-group">
+                        <label class="form-label">${t('newPassword')}</label>
+                        <input type="password" class="form-input" id="newPassword" placeholder="${t('newPassword')}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">${t('confirmPassword')}</label>
+                        <input type="password" class="form-input" id="confirmNewPassword" placeholder="${t('confirmPassword')}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;">
+                        ${t('updatePassword')}
+                    </button>
+                </form>
+            `;
+
+            document.getElementById('authForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleResetPassword();
+            });
+        }
+        return;
+    }
+
     // For forgot password, show email-only form
     if (isForgot) {
         regStep = 0;
@@ -1884,18 +1916,6 @@ async function handleForgotPassword() {
     if (!emailInput || !supabaseClient) return;
 
     const email = emailInput.value.trim();
-    if (!email) {
-        showToast(t('emailPlaceholder') + ' required', 'warning');
-        return;
-    }
-
-    pendingResetEmail = email;
-    // Use query parameters for Netlify compatibility
-    const resetUrl = `${window.location.origin}?type=recovery`;
-
-    console.log('Attempting to send reset link to:', email);
-    console.log('Reset URL:', resetUrl);
-
     try {
         // Use Supabase built-in reset password function
         const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
@@ -1920,41 +1940,70 @@ async function handleForgotPassword() {
         console.log('📧 Check SUPABASE_EMAIL_SETUP.md for configuration');
         console.log('🔗 For testing, use this reset URL:', resetUrl);
 
-        showToast('Check console for reset URL (email not configured)', 'warning');
 
     }
 
+    const { access_token, refresh_token, type } = getHashParams()
+
+    if (access_token && refresh_token && type === 'recovery') {
+      console.log('Password reset link detected')
+
+      try {
+        const { error } = await supabaseClient.auth.setSession({
+          access_token,
+          refresh_token
+        })
+
+        if (error) {
+          console.error('Session error:', error)
+          showToast('Invalid or expired reset link', 'error')
+          return
+        }
+
+        console.log('Session set successfully')
+
+        // Чистим URL
+        window.history.replaceState(null, '', window.location.pathname)
+
+        // 🔥 ВАЖНО — открываем модалку
+        renderAuthForm('reset')
+
+      } catch (err) {
+        console.error('Error setting session:', err)
+        showToast('Error processing reset link', 'error')
+      }
+    }}
+
+async function handleResetPassword() {
+    const pass1 = document.getElementById('newPassword')?.value;
+    const pass2 = document.getElementById('confirmNewPassword')?.value;
+
+    if (!pass1 || !pass2) {
+        showToast(t('fillAllFields'), 'warning');
+        return;
+    }
+
+    if (pass1.length < 6) {
+        showToast(t('passwordTooShort'), 'warning');
+        return;
+    }
+
+    if (pass1 !== pass2) {
+        showToast(t('passwordsDoNotMatch'), 'error');
+        return;
+    }
+
+    const { error } = await supabaseClient.auth.updateUser({
+        password: pass1
+    });
+
+    if (error) {
+        showToast(error.message, 'error');
+    } else {
+        showToast(t('passwordUpdated'), 'success');
+    }
 }
-    if (accessToken && refreshToken && type === 'recovery') {
-        // This is a password reset link
-        console.log('Password reset link detected');
-        console.log('Current URL:', window.location.href);
-        console.log('Hash params:', window.location.hash);
-        console.log('Query params:', window.location.search);
-        console.log('Access token:', accessToken.substring(0, 20) + '...');
-        console.log('Type:', type);
 
-        try {
-            // Set the session from URL parameters
-            const { data, error } = await supabaseClient.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken
-            });
-
-            if (error) {
-                console.error('Session error:', error);
-                showToast('Invalid or expired reset link', 'error');
-            } else {
-                console.log('Session set successfully for password reset');
-                // Clear the URL parameters to clean up the URL
-                window.history.replaceState(null, null, window.location.pathname);
-                // Open the reset password modal
-
-            }
-        } catch (err) {
-            console.error('Error setting session:', err);
-            showToast('Error processing reset link', 'error');
-        }}
 
 async function loadSession() {
     if (!supabaseClient) return;
