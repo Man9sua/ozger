@@ -1811,15 +1811,16 @@ async function completeRegistration(password) {
         showToast(t('registerSuccess'), 'success');
         closeModal('authModal');
         updateAuthUI();
+        showHome();
         return;
     }
-    
+
     try {
-        const { data, error } = await supabaseClient.auth.signUp({ 
-            email: regData.email, 
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: regData.email,
             password,
-            options: { 
-                data: { 
+            options: {
+                data: {
                     username: regData.username,
                     country: regData.country,
                     city: regData.city,
@@ -1827,18 +1828,29 @@ async function completeRegistration(password) {
                     class: regData.class,
                     subject1: regData.subject1,
                     subject2: regData.subject2
-                } 
+                },
+                emailRedirectTo: `${window.location.origin}?type=signup`
             }
         });
-        
+
         if (error) throw error;
-        
-        // Save profile locally too
-        userProfile = { ...regData };
-        localStorage.setItem('ozgerUserProfile', JSON.stringify(userProfile));
-        
-        showToast(t('registerSuccess'), 'success');
-        closeModal('authModal');
+
+        // Check if user is immediately authenticated (email confirmation disabled)
+        if (data.user && data.session) {
+            currentUser = data.user;
+            // Save profile locally
+            userProfile = { ...regData };
+            localStorage.setItem('ozgerUserProfile', JSON.stringify(userProfile));
+            showToast(t('registerSuccess'), 'success');
+            closeModal('authModal');
+            updateAuthUI();
+            showHome();
+        } else {
+            // Email confirmation required - show appropriate message
+            showToast('Регистрация успешна! Проверьте вашу почту для подтверждения.', 'success');
+            closeModal('authModal');
+        }
+
     } catch (error) {
         showToast(t('registerError') + ': ' + error.message, 'error');
     }
@@ -1877,22 +1889,26 @@ async function handleAuth(isLogin) {
             if (error) throw error;
             
             currentUser = data.user;
+            
+            // Load user profile
+            if (!userProfile) {
+                userProfile = {};
+            }
+            
+            // Update auth UI and close modal
             showToast(t('loginSuccess'), 'success');
             closeModal('authModal');
             updateAuthUI();
+            showHome();
         } else {
-            const { data, error } = await supabaseClient.auth.signUp({ 
-                email, 
-                password,
-                options: { data: { username: username } }
-            });
-            if (error) throw error;
-            
-            showToast(t('registerSuccess'), 'success');
-            closeModal('authModal');
+            // Registration is handled by completeRegistration() function
+            // This should not be called from handleAuth
+            showToast('Используйте пошаговую регистрацию', 'warning');
         }
     } catch (err) {
-        showToast(`${isLogin ? t('loginError') : t('registerError')}: ${err.message}`, 'error');
+        console.error('Auth error:', err);
+        const errorMsg = err.message || 'Unknown error';
+        showToast(`${isLogin ? t('loginError') : t('registerError')}: ${errorMsg}`, 'error');
     }
 }
 
@@ -1916,6 +1932,12 @@ async function handleForgotPassword() {
     if (!emailInput || !supabaseClient) return;
 
     const email = emailInput.value.trim();
+    
+    if (!email) {
+        showToast(t('fillAllFields'), 'warning');
+        return;
+    }
+
     const resetUrl = `${window.location.origin}?type=recovery`;
     try {
         // Use Supabase built-in reset password function
@@ -1925,56 +1947,101 @@ async function handleForgotPassword() {
 
         if (error) {
             console.error('Reset password error:', error);
-            console.log('❌ Email not configured in Supabase!');
-            console.log('📧 To enable email sending, follow instructions in SUPABASE_EMAIL_SETUP.md');
-
-
-
+            showToast('Ошибка: ' + error.message, 'error');
+            console.log('❌ Проблема при отправке письма!');
+            console.log('📧 Проверьте конфигурацию SMTP в Supabase Dashboard');
+            console.log('🔧 Убедитесь что в Supabase > Authentication > Email Templates настроены');
+            console.log('🔧 И что SMTP сервер настроен в Supabase > Settings > SMTP Settings');
         } else {
-            console.log('Reset password link sent successfully:', data);
-            showToast('Reset password link sent to your email', 'success');
-;
+            console.log('Письмо для восстановления отправлено:', data);
+            showToast('Письмо отправлено на ваш email. Проверьте папку спам.', 'success');
+            renderAuthForm('login');
         }
     } catch (err) {
         console.error('Reset password error:', err);
         console.log('❌ Network/Supabase error!');
         console.log('📧 Check SUPABASE_EMAIL_SETUP.md for configuration');
+        showToast('Ошибка сети при отправке письма', 'error');
 
 
 
     }
+}
+window.addEventListener('load', async () => {
+    // Small delay to ensure everything is loaded
+    await new Promise(resolve => setTimeout(resolve, 100));
+    // Check for reset password tokens in URL (both hash and query params for Netlify compatibility)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const queryParams = new URLSearchParams(window.location.search);
 
-    const { access_token, refresh_token, type } = getHashParams()
+    // Try hash params first (local development), then query params (Netlify)
+    let accessToken = hashParams.get('access_token') || queryParams.get('access_token');
+    let refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+    let type = hashParams.get('type') || queryParams.get('type');
 
-    if (access_token && refresh_token && type === 'recovery') {
-      console.log('Password reset link detected')
+    // Also check for fragment parameter that Supabase might use
+    if (!type && window.location.hash.includes('type=recovery')) {
+        type = 'recovery';
+    }
+    if (!type && window.location.hash.includes('type=signup')) {
+        type = 'signup';
+    }
 
-      try {
-        const { error } = await supabaseClient.auth.setSession({
-          access_token,
-          refresh_token
-        })
+    // Handle email confirmation
+    if (accessToken && refreshToken && type === 'signup') {
+        console.log('Email confirmation link detected');
+        try {
+            const { data, error } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+            });
 
-        if (error) {
-          console.error('Session error:', error)
-          showToast('Invalid or expired reset link', 'error')
-          return
+            if (error) {
+                console.error('Email confirmation error:', error);
+                showToast('Ошибка подтверждения email', 'error');
+            } else {
+                console.log('Email confirmed successfully');
+                showToast('Email подтвержден! Добро пожаловать!', 'success');
+                // Clean URL
+                window.history.replaceState(null, null, window.location.pathname);
+                showHome();
+            }
+        } catch (err) {
+            console.error('Error confirming email:', err);
+            showToast('Ошибка при подтверждении email', 'error');
         }
+    } else if (accessToken && refreshToken && type === 'recovery') {
+        // This is a password reset link
+        console.log('Password reset link detected');
+        console.log('Current URL:', window.location.href);
+        console.log('Hash params:', window.location.hash);
+        console.log('Query params:', window.location.search);
+        console.log('Access token:', accessToken.substring(0, 20) + '...');
+        console.log('Type:', type);
 
-        console.log('Session set successfully')
+        try {
+            // Set the session from URL parameters
+            const { data, error } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken
+            });
 
-        // Чистим URL
-        window.history.replaceState(null, '', window.location.pathname)
-
-        // 🔥 ВАЖНО — открываем модалку
-        renderAuthForm('reset')
-
-      } catch (err) {
-        console.error('Error setting session:', err)
-        showToast('Error processing reset link', 'error')
-      }
-    }}
-
+            if (error) {
+                console.error('Session error:', error);
+                showToast('Invalid or expired reset link', 'error');
+            } else {
+                console.log('Session set successfully for password reset');
+                // Clear the URL parameters to clean up the URL
+                window.history.replaceState(null, null, window.location.pathname);
+                // Open the reset password modal
+                setAuthStep('reset-password');
+                openModalById('authModal');
+            }
+        } catch (err) {
+            console.error('Error setting session:', err);
+            showToast('Error processing reset link', 'error');
+        }
+    }})
 async function handleResetPassword() {
     const pass1 = document.getElementById('newPassword')?.value;
     const pass2 = document.getElementById('confirmNewPassword')?.value;
