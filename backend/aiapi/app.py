@@ -14,20 +14,19 @@ import json
 import hashlib
 from collections import OrderedDict
 
-# Load environment variables
+
 load_dotenv()
 
-# Import services
 from services.gemini_service import get_gemini_service, GeminiService
 from services.pdf_service import extract_text_from_pdf
 
 app = Flask(__name__)
 CORS(app)
 
-# Store materials temporarily (in production, use proper storage)
+
 materials_store = {}
 
-# Simple in-memory cache/rate limit to reduce token usage
+
 _cache = OrderedDict()
 _rate_limits = {}
 
@@ -138,7 +137,7 @@ def upload_material():
     try:
         material_text = ""
         
-        # Check for PDF file
+       
         if 'file' in request.files:
             file = request.files['file']
             if file.filename.lower().endswith('.pdf'):
@@ -146,7 +145,6 @@ def upload_material():
             else:
                 return jsonify({"error": "Тек PDF файлдары қолдау көрсетіледі"}), 400
         
-        # Check for text input
         elif 'text' in request.form:
             material_text = request.form['text']
         
@@ -157,11 +155,11 @@ def upload_material():
         if not material_text or not material_text.strip():
             return jsonify({"error": "Материал табылмады"}), 400
         
-        # Generate material ID
+
         import hashlib
         material_id = hashlib.md5(material_text[:100].encode()).hexdigest()[:12]
         
-        # Store material
+
         materials_store[material_id] = material_text
         
         return jsonify({
@@ -191,7 +189,7 @@ def generate_learn():
     try:
         data = request.get_json()
         
-        # Rate limiting
+     
         client_key = _get_client_key(data)
         allowed, retry_after = _rate_limit_check(client_key)
         if not allowed:
@@ -199,7 +197,7 @@ def generate_learn():
                 "Retry-After": str(retry_after)
             }
 
-        # Get material
+  
         material_id = data.get('material_id')
         material = data.get('material')
         history_mode = data.get('history_mode', False)
@@ -211,13 +209,13 @@ def generate_learn():
         if not material:
             return jsonify({"error": "Материал табылмады"}), 400
         
-        # Cache
+      
         cache_key = _cache_key("learn", data, material)
         cached = _cache_get(cache_key)
         if cached:
             return jsonify(cached)
 
-        # Generate content
+        
         gemini = get_gemini_service()
         result = run_async(gemini.generate_learn_content(material, history_mode, language))
         _cache_set(cache_key, result)
@@ -245,7 +243,7 @@ def generate_practice():
     try:
         data = request.get_json()
         
-        # Rate limiting
+      
         client_key = _get_client_key(data)
         allowed, retry_after = _rate_limit_check(client_key)
         if not allowed:
@@ -253,7 +251,7 @@ def generate_practice():
                 "Retry-After": str(retry_after)
             }
 
-        # Get material
+
         material_id = data.get('material_id')
         material = data.get('material')
         count = data.get('count', 10)
@@ -266,17 +264,17 @@ def generate_practice():
         if not material:
             return jsonify({"error": "Материал табылмады"}), 400
         
-        # Validate count
+        
         if count not in [10, 15, 20, 25, 30]:
             count = 10
         
-        # Cache
+        
         cache_key = _cache_key("practice", data, material)
         cached = _cache_get(cache_key)
         if cached:
             return jsonify(cached)
 
-        # Generate content
+       
         gemini = get_gemini_service()
         result = run_async(gemini.generate_practice_questions(material, count, exclude_questions, language))
         _cache_set(cache_key, result)
@@ -302,7 +300,7 @@ def generate_realtest():
     try:
         data = request.get_json()
         
-        # Rate limiting
+        
         client_key = _get_client_key(data)
         allowed, retry_after = _rate_limit_check(client_key)
         if not allowed:
@@ -310,7 +308,7 @@ def generate_realtest():
                 "Retry-After": str(retry_after)
             }
 
-        # Get material
+        
         material_id = data.get('material_id')
         material = data.get('material')
         count = data.get('count', 10)
@@ -322,17 +320,17 @@ def generate_realtest():
         if not material:
             return jsonify({"error": "Материал табылмады"}), 400
         
-        # Validate count
+       
         if count not in [10, 15, 20, 25, 30]:
             count = 10
         
-        # Cache
+       
         cache_key = _cache_key("realtest", data, material)
         cached = _cache_get(cache_key)
         if cached:
             return jsonify(cached)
 
-        # Generate content
+       
         gemini = get_gemini_service()
         result = run_async(gemini.generate_realtest_questions(material, count, language))
         _cache_set(cache_key, result)
@@ -360,7 +358,7 @@ def generate_continue():
     try:
         data = request.get_json()
         
-        # Rate limiting
+        
         client_key = _get_client_key(data)
         allowed, retry_after = _rate_limit_check(client_key)
         if not allowed:
@@ -380,13 +378,13 @@ def generate_continue():
         if not material:
             return jsonify({"error": "Материал табылмады"}), 400
         
-        # Cache
+       
         cache_key = _cache_key("continue", data, material)
         cached = _cache_get(cache_key)
         if cached:
             return jsonify(cached)
 
-        # Generate new content excluding previous questions
+        
         gemini = get_gemini_service()
         result = run_async(gemini.generate_practice_questions(material, count, previous_questions, language))
         _cache_set(cache_key, result)
@@ -405,3 +403,4 @@ if __name__ == '__main__':
     print(f"📚 Ready to help with ENT preparation!")
     
     app.run(host='0.0.0.0', port=port, debug=debug)
+
