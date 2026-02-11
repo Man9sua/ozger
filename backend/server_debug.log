@@ -1,0 +1,110 @@
+
+> ozgerupt-backend@1.0.0 start
+> node server.js
+
+info: Server running on port 3001 in development mode {"timestamp":"2026-01-01T05:52:06.533Z"}
+🚀 Server running on http://localhost:3001
+info: Rating request: type=average, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:21.208Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:21.210Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:21.211Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:21.212Z"}
+Sorting 15 ratings by type: average
+Sorted by average score, first 3: Айжан С.:115.5, Мадияр А.:112.75, Данияр Н.:108.25
+info: Rating response: 15 items in 6ms {"timestamp":"2026-01-01T05:52:21.214Z"}
+info: GET /api/rating?type=average 200 19ms {"meta":{"req":{"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"curl/8.17.0"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=average","query":{"type":"average"},"url":"/api/rating?type=average"},"res":{"statusCode":200},"responseTime":19},"timestamp":"2026-01-01T05:52:21.228Z"}
+info: Rating request: type=total, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:29.691Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:29.697Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:29.701Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:29.703Z"}
+Sorting 15 ratings by type: total
+Sorted by total tests, first 3: Мадияр А.:18, Алина П.:16, Айжан С.:15
+info: Rating response: 15 items in 13ms {"timestamp":"2026-01-01T05:52:29.704Z"}
+info: GET /api/rating?type=total 200 14ms {"meta":{"req":{"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"curl/8.17.0"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=total","query":{"type":"total"},"url":"/api/rating?type=total"},"res":{"statusCode":200},"responseTime":14},"timestamp":"2026-01-01T05:52:29.705Z"}
+info: Rating request: type=average, subject=undefined, scope=school {"timestamp":"2026-01-01T05:52:34.390Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:34.391Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:34.392Z"}
+info: Demo filter by school "Dostyq School", results: 5 {"timestamp":"2026-01-01T05:52:34.393Z"}
+Sorting 5 ratings by type: average
+Sorted by average score, first 3: Айжан С.:115.5, Асем К.:105, Гульмира Р.:95.75
+info: Rating response: 5 items in 3ms {"timestamp":"2026-01-01T05:52:34.393Z"}
+info: GET /api/rating?type=average&scope=school 200 3ms {"meta":{"req":{"headers":{"accept":"*/*","host":"localhost:3001","user-agent":"curl/8.17.0"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=average&scope=school","query":{"scope":"school","type":"average"},"url":"/api/rating?type=average&scope=school"},"res":{"statusCode":200},"responseTime":3},"timestamp":"2026-01-01T05:52:34.394Z"}
+info: Rating request: type=ent, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:44.742Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.744Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.747Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:44.749Z"}
+Sorting 15 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Данияр Н.:118, Мадияр А.:115
+info: Rating response: 15 items in 9ms {"timestamp":"2026-01-01T05:52:44.751Z"}
+info: GET /api/rating?type=ent 200 12ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=ent","query":{"type":"ent"},"url":"/api/rating?type=ent"},"res":{"statusCode":200},"responseTime":12},"timestamp":"2026-01-01T05:52:44.757Z"}
+info: Rating request: type=average, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:44.789Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.790Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.791Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:44.792Z"}
+Sorting 15 ratings by type: average
+Sorted by average score, first 3: Айжан С.:115.5, Мадияр А.:112.75, Данияр Н.:108.25
+info: Rating response: 15 items in 4ms {"timestamp":"2026-01-01T05:52:44.793Z"}
+info: GET /api/rating?type=average 200 7ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=average","query":{"type":"average"},"url":"/api/rating?type=average"},"res":{"statusCode":200},"responseTime":7},"timestamp":"2026-01-01T05:52:44.797Z"}
+info: Rating request: type=total, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:44.807Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.807Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.808Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:44.808Z"}
+Sorting 15 ratings by type: total
+Sorted by total tests, first 3: Мадияр А.:18, Алина П.:16, Айжан С.:15
+info: Rating response: 15 items in 1ms {"timestamp":"2026-01-01T05:52:44.808Z"}
+info: GET /api/rating?type=total 200 3ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?type=total","query":{"type":"total"},"url":"/api/rating?type=total"},"res":{"statusCode":200},"responseTime":3},"timestamp":"2026-01-01T05:52:44.810Z"}
+info: Rating request: type=ent, subject=undefined, scope=all {"timestamp":"2026-01-01T05:52:44.817Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.822Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.834Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:52:44.835Z"}
+Sorting 15 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Данияр Н.:118, Мадияр А.:115
+info: Rating response: 15 items in 22ms {"timestamp":"2026-01-01T05:52:44.839Z"}
+info: GET /api/rating?scope=all 200 26ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=all","query":{"scope":"all"},"url":"/api/rating?scope=all"},"res":{"statusCode":200},"responseTime":26},"timestamp":"2026-01-01T05:52:44.844Z"}
+info: Rating request: type=ent, subject=undefined, scope=school {"timestamp":"2026-01-01T05:52:44.864Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.869Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.876Z"}
+info: Demo filter by school "Dostyq School", results: 5 {"timestamp":"2026-01-01T05:52:44.877Z"}
+Sorting 5 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Асем К.:112, Гульмира Р.:102
+info: Rating response: 5 items in 14ms {"timestamp":"2026-01-01T05:52:44.878Z"}
+info: GET /api/rating?scope=school 200 16ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=school","query":{"scope":"school"},"url":"/api/rating?scope=school"},"res":{"statusCode":200},"responseTime":16},"timestamp":"2026-01-01T05:52:44.885Z"}
+info: Rating request: type=ent, subject=undefined, scope=class {"timestamp":"2026-01-01T05:52:44.892Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.898Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.903Z"}
+info: Demo filter by class "11А", results: 6 {"timestamp":"2026-01-01T05:52:44.906Z"}
+Sorting 6 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Мадияр А.:115, Жансая М.:108
+info: Rating response: 6 items in 15ms {"timestamp":"2026-01-01T05:52:44.907Z"}
+info: GET /api/rating?scope=class 200 24ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=class","query":{"scope":"class"},"url":"/api/rating?scope=class"},"res":{"statusCode":200},"responseTime":24},"timestamp":"2026-01-01T05:52:44.925Z"}
+info: Rating request: type=ent, subject=undefined, scope=profile {"timestamp":"2026-01-01T05:52:44.944Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:52:44.949Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:52:44.958Z"}
+info: Profile scope selected - showing all for now {"timestamp":"2026-01-01T05:52:44.962Z"}
+Sorting 15 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Данияр Н.:118, Мадияр А.:115
+info: Rating response: 15 items in 18ms {"timestamp":"2026-01-01T05:52:44.963Z"}
+info: GET /api/rating?scope=profile 200 22ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=profile","query":{"scope":"profile"},"url":"/api/rating?scope=profile"},"res":{"statusCode":200},"responseTime":22},"timestamp":"2026-01-01T05:52:44.968Z"}
+info: Rating request: type=ent, subject=undefined, scope=all {"timestamp":"2026-01-01T05:53:02.493Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:53:02.495Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:53:02.500Z"}
+info: Showing all ratings {"timestamp":"2026-01-01T05:53:02.501Z"}
+Sorting 15 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Данияр Н.:118, Мадияр А.:115
+info: Rating response: 15 items in 11ms {"timestamp":"2026-01-01T05:53:02.504Z"}
+info: GET /api/rating 200 12ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating","query":{},"url":"/api/rating"},"res":{"statusCode":200},"responseTime":12},"timestamp":"2026-01-01T05:53:02.520Z"}
+info: Rating request: type=ent, subject=undefined, scope=school {"timestamp":"2026-01-01T05:53:02.551Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:53:02.553Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:53:02.554Z"}
+info: Demo filter by school "Dostyq School", results: 5 {"timestamp":"2026-01-01T05:53:02.555Z"}
+Sorting 5 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Асем К.:112, Гульмира Р.:102
+info: Rating response: 5 items in 5ms {"timestamp":"2026-01-01T05:53:02.556Z"}
+info: GET /api/rating?scope=school 200 5ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=school","query":{"scope":"school"},"url":"/api/rating?scope=school"},"res":{"statusCode":200},"responseTime":5},"timestamp":"2026-01-01T05:53:02.566Z"}
+info: Rating request: type=ent, subject=undefined, scope=class {"timestamp":"2026-01-01T05:53:02.581Z"}
+info: Dynamic cache not found or invalid, trying realistic cache... {"timestamp":"2026-01-01T05:53:02.585Z"}
+info: ✅ Loaded realistic rating data from cache {"timestamp":"2026-01-01T05:53:02.589Z"}
+info: Demo filter by class "11А", results: 6 {"timestamp":"2026-01-01T05:53:02.590Z"}
+Sorting 6 ratings by type: ent
+Sorted by ENT score, first 3: Айжан С.:125, Мадияр А.:115, Жансая М.:108
+info: Rating response: 6 items in 14ms {"timestamp":"2026-01-01T05:53:02.595Z"}
+info: GET /api/rating?scope=class 200 16ms {"meta":{"req":{"headers":{"connection":"keep-alive","host":"localhost:3001"},"httpVersion":"1.1","method":"GET","originalUrl":"/api/rating?scope=class","query":{"scope":"class"},"url":"/api/rating?scope=class"},"res":{"statusCode":200},"responseTime":16},"timestamp":"2026-01-01T05:53:02.601Z"}

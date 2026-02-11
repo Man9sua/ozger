@@ -1,0 +1,2 @@
+{"code":"PGRST205","details":null,"hint":null,"level":"error","message":"Supabase rating fetch error: Could not find the table 'public.user_stats' in the schema cache","timestamp":"2026-01-01T05:07:57.343Z"}
+{"code":"PGRST205","details":null,"hint":null,"level":"error","message":"Supabase sync error: Could not find the table 'public.user_stats' in the schema cache","timestamp":"2026-01-01T05:09:10.168Z"}

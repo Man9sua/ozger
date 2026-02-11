@@ -1,0 +1,13 @@
+name = "ozger"
+main = "cloudflare/worker.js"
+compatibility_date = "2024-12-01"
+workers_dev = true
+
+routes = [
+  { pattern = "ozger.com/*", zone_id = "5385f196c5c89be772d8234630e77ef8" },
+  { pattern = "www.ozger.com/*", zone_id = "5385f196c5c89be772d8234630e77ef8" }
+]
+
+[assets]
+directory = "frontend"
+binding = "ASSETS"
