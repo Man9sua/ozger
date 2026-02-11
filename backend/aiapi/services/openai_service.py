@@ -22,10 +22,10 @@ class OpenAIService:
         
         self.client = OpenAI(api_key=self.api_key)
         
-        # Model to use
+       
         self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
         
-        # Retry settings
+        
         try:
             self.max_retries = max(1, int(os.getenv("OPENAI_MAX_RETRIES", "2")))
         except Exception:
@@ -35,7 +35,7 @@ class OpenAIService:
         except Exception:
             self.retry_delay = 2.0
         
-        # Base system prompt for ENT preparation
+        
         self.system_prompt = """
 Сен - ЕНТ дайындық үшін AI оқытушысың (Қазақстандағы мектеп түлектерінің бірыңғай ұлттық тестілеуі).
 
@@ -417,7 +417,7 @@ JSON жауап:"""
             raise Exception(f"OpenAI API қатесі: {str(e)}")
 
 
-# Singleton instance
+
 _openai_service = None
 
 
@@ -427,5 +427,6 @@ def get_openai_service() -> OpenAIService:
     if _openai_service is None:
         _openai_service = OpenAIService()
     return _openai_service
+
 
 # Временно не используется
