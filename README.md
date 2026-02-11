@@ -1,0 +1,2 @@
+# ozger
+CRUDL + AI project
