@@ -25,10 +25,10 @@ class GeminiService:
         
         genai.configure(api_key=self.api_key)
         
-        # Configure generation settings with higher token limit
+        
         generation_config = genai.GenerationConfig(
             temperature=0.7,
-            max_output_tokens=16384,  # Increased for large PDFs
+            max_output_tokens=16384,  
         )
         
         self.model = genai.GenerativeModel(
@@ -36,8 +36,7 @@ class GeminiService:
             generation_config=generation_config
         )
         
-        # IMPORTANT: keep retries low; frontend expects one generation per click.
-        # If Gemini times out, user can retry manually.
+        
         try:
             self.max_retries = max(1, int(os.getenv("GEMINI_MAX_RETRIES", "1")))
         except Exception:
@@ -45,9 +44,8 @@ class GeminiService:
         try:
             self.retry_delay = max(0.0, float(os.getenv("GEMINI_RETRY_DELAY", "2")))
         except Exception:
-            self.retry_delay = 2.0  # seconds
+            self.retry_delay = 2.0 
         
-        # Large material processing controls (reduce request count)
         summarize_flag = os.getenv("GEMINI_SUMMARIZE_LARGE", "false").strip().lower()
         self.summarize_large = summarize_flag in ("1", "true", "yes")
         try:
@@ -72,7 +70,7 @@ class GeminiService:
         self.summary_cache_max = max(0, min(200, self.summary_cache_max))
         self._summary_cache: "OrderedDict[str, str]" = OrderedDict()
 
-        # Base system prompt for ENT preparation
+        
         self.system_prompt = """
 Сен - ЕНТ дайындық үшін AI оқытушысың (Қазақстандағы мектеп түлектерінің бірыңғай ұлттық тестілеуі).
 
@@ -144,7 +142,7 @@ IMPORTANT RULES:
             end = min(n, start + max_chars)
             chunk = text[start:end]
 
-            # If not last chunk, try to cut on a paragraph boundary near the end
+            
             if end < n:
                 search_from = max(0, len(chunk) - 2500)
                 cut = chunk.rfind("\n\n", search_from)
@@ -204,19 +202,19 @@ IMPORTANT RULES:
             self._cache_set(cache_key, truncated)
             return truncated
 
-        # Cap number of model calls: we must ensure we don't create hundreds of chunks for big PDFs.
+        
         max_chunks = self.max_chunks
-        # Choose chunk size so we end up with ~max_chunks chunks (bounded).
+        
         max_chars = int(math.ceil(len(material) / max_chunks))
-        # Keep chunks within reasonable size so Gemini stays stable.
+        
         max_chars = max(self.min_chunk_chars, min(self.max_chunk_chars, max_chars))
         chunks = self._chunk_text(material, max_chars=max_chars, overlap=1200)
 
-        # Hard cap in case of pathological input
+       
         if len(chunks) > max_chunks:
             chunks = chunks[:max_chunks]
 
-        # If chunking didn't help, fall back to a soft truncate with a warning marker
+        
         if len(chunks) <= 1:
             truncated = material[:target_chars] + "\n\n[Материал қысқартылды (өте үлкен мәтін)]"
             self._cache_set(cache_key, truncated)
@@ -253,7 +251,7 @@ IMPORTANT RULES:
             self._cache_set(cache_key, combined_notes)
             return combined_notes
 
-        # Reduce step: compress the combined notes to a single compact context
+        
         lang_instruction = self._language_instruction(lang)
         reduce_prompt = f"""{self.system_prompt}
 {lang_instruction}
@@ -274,7 +272,7 @@ IMPORTANT RULES:
 
     def _clean_json_response(self, text: str) -> str:
         """Clean and extract JSON from response text"""
-        # Remove markdown code blocks if present
+        
         text = text.strip()
         if text.startswith("```json"):
             text = text[7:]
@@ -284,28 +282,27 @@ IMPORTANT RULES:
             text = text[:-3]
         text = text.strip()
         
-        # Try to fix truncated JSON
+        
         if text:
-            # Count brackets to check if JSON is complete
+            
             open_braces = text.count('{') - text.count('}')
             open_brackets = text.count('[') - text.count(']')
             
-            # If JSON is truncated, try to close it
+            
             if open_braces > 0 or open_brackets > 0:
-                # Find last complete item and truncate there
-                # Try to find last complete question or section
+
                 
-                # First, try to close any open strings
+                
                 quote_count = text.count('"') 
                 if quote_count % 2 != 0:
-                    # Find last quote and truncate after previous complete item
+                    
                     last_complete = text.rfind('},')
                     if last_complete == -1:
                         last_complete = text.rfind('}]')
                     if last_complete > 0:
                         text = text[:last_complete+1]
                 
-                # Close remaining brackets
+                
                 open_braces = text.count('{') - text.count('}')
                 open_brackets = text.count('[') - text.count(']')
                 
@@ -326,13 +323,13 @@ IMPORTANT RULES:
                 last_error = e
                 error_str = str(e).lower()
                 
-                # Retry on timeout or server errors
+                
                 if 'timeout' in error_str or '504' in error_str or '503' in error_str or '500' in error_str:
                     if attempt < self.max_retries - 1:
                         time.sleep(self.retry_delay * (attempt + 1))
                         continue
                 
-                # Don't retry on other errors
+                
                 raise
         
         raise last_error
@@ -345,13 +342,13 @@ IMPORTANT RULES:
             material: Source material text
             history_mode: If True, use 3-view format (general, summary, timeline)
         """
-        # For large PDFs/text: summarize instead of hard truncation
+        
         target_chars = 70000 if history_mode else 50000
         material = self._prepare_large_material(material, target_chars=target_chars, lang=lang)
         lang_instruction = self._language_instruction(lang)
         
         if history_mode:
-            # History Mode - detailed 3-view format
+           
             prompt = f"""Сен - тарих оқытушы AI. Тек берілген материалды пайдалан.
 {lang_instruction}
 
@@ -401,7 +398,7 @@ JSON ФОРМАТ:
 
 JSON:"""
         else:
-            # Normal Mode - simple format
+            
             prompt = f"""Сен - оқу AI. Тек берілген материалды пайдалан.
 {lang_instruction}
 
@@ -451,7 +448,7 @@ JSON:"""
         Returns:
             Dictionary with questions
         """
-        # For large PDFs/text: summarize instead of hard truncation
+        
         material = self._prepare_large_material(material, target_chars=50000, lang=lang)
         lang_instruction = self._language_instruction(lang)
 
@@ -509,7 +506,7 @@ JSON жауап:"""
         Returns:
             Dictionary with test questions
         """
-        # For large PDFs/text: summarize instead of hard truncation
+        
         material = self._prepare_large_material(material, target_chars=50000, lang=lang)
         lang_instruction = self._language_instruction(lang)
 
@@ -552,7 +549,7 @@ JSON жауап:"""
             raise Exception(f"Gemini API қатесі: {str(e)}")
 
 
-# Singleton instance
+
 _gemini_service = None
 
 
@@ -562,3 +559,4 @@ def get_gemini_service() -> GeminiService:
     if _gemini_service is None:
         _gemini_service = GeminiService()
     return _gemini_service
+
